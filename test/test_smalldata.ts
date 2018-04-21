@@ -1,7 +1,8 @@
 import {assert, use} from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 
-import {BasicMuse, IExample, Transform} from '../lib/smalldata';
+import {IExample} from '../lib/ITheory';
+import {getMuse, Transform} from '../lib/smalldata';
 
 use(chaiAsPromised);
 
@@ -19,7 +20,7 @@ function eg(x: string, y: string): IExample {
 describe("BasicMuse", () => {
 
   it("spots simple capitalization", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("hi", "HI"));
     bm.train(eg("there", "THERE"));
     const test = eg("you", "YOU");
@@ -29,7 +30,7 @@ describe("BasicMuse", () => {
   });
 
   it("spots simple lowercase", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("Hi", "hi"));
     bm.train(eg("THERE", "there"));
     const test = eg("YoU", "you");
@@ -38,7 +39,7 @@ describe("BasicMuse", () => {
   });
 
   it("spots simple identity", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("hi", "hi"));
     bm.train(eg("there", "there"));
     const test = eg("you", "you");
@@ -47,7 +48,7 @@ describe("BasicMuse", () => {
   });
 
   it("spots simple replacement", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "apple"));
     bm.train(eg("b", "boat"));
     bm.train(eg("a", "apple"));
@@ -58,7 +59,7 @@ describe("BasicMuse", () => {
   });
 
   it("spots constant", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "goo"));
     bm.train(eg("b", "goo"));
     const test = eg("c", "goo");
@@ -67,7 +68,7 @@ describe("BasicMuse", () => {
   });
 
   it("spots title case", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("bob dole", "Bob Dole"));
     bm.train(eg("space monkey planet", "Space Monkey Planet"));
     const test = eg("for shame", "For Shame");
@@ -76,7 +77,7 @@ describe("BasicMuse", () => {
   });
 
   it("spots initial capitalization", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("bob dole", "Bob dole"));
     bm.train(eg("space monkey planet", "Space monkey planet"));
     const test = eg("for shame", "For shame");
@@ -90,7 +91,7 @@ describe("BasicMuse", () => {
 describe("SuffixTool", () => {
 
   it("spots simple suffix", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "a!"));
     bm.train(eg("b", "b!"));
     bm.train(eg("c", "c!"));
@@ -100,7 +101,7 @@ describe("SuffixTool", () => {
   });
 
   it("spots capitalize plus suffix", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "A!"));
     bm.train(eg("b", "B!"));
     bm.train(eg("c", "C!"));
@@ -114,7 +115,7 @@ describe("SuffixTool", () => {
 describe("PrefixTool", () => {
 
   it("spots simple prefix", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "!a"));
     bm.train(eg("b", "!b"));
     bm.train(eg("c", "!c"));
@@ -124,7 +125,7 @@ describe("PrefixTool", () => {
   });
 
   it("spots capitalize plus prefix", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "!A"));
     bm.train(eg("b", "!B"));
     bm.train(eg("c", "!C"));
@@ -134,7 +135,7 @@ describe("PrefixTool", () => {
   });
 
   it("spots capitalize plus prefix plus suffix", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("a", "(A)"));
     bm.train(eg("b", "(B)"));
     bm.train(eg("c", "(C)"));
@@ -150,7 +151,7 @@ describe("PrefixTool", () => {
 describe("RemovalTool", () => {
 
   it("spots a dropped letter", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("aaaab", "aaaa"));
     bm.train(eg("aaba", "aaa"));
     bm.train(eg("ba", "a"));
@@ -160,7 +161,7 @@ describe("RemovalTool", () => {
   });
 
   it("spots a dropped letter among many", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("hello world", "helloworld"));
     bm.train(eg("free the space monkeys", "freethespacemonkeys"));
     bm.train(eg("sandwich", "sandwich"));
@@ -170,7 +171,7 @@ describe("RemovalTool", () => {
   });
 
   it("spots dropped letters and capitalization and suffix", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("hello world!", "hellwrld!"));
     bm.train(eg("free the space monkeys", "freethespacemnkeys!"));
     bm.train(eg("sandwich", "sandwich!"));
@@ -185,7 +186,7 @@ describe("RemovalTool", () => {
 describe("TrimTool", () => {
 
   it("spots trimming", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("  bob dole", "bob dole"));
     bm.train(eg("space monkey planet  ", "space monkey planet"));
     const test = eg("  for shame  ", "for shame");
@@ -194,7 +195,7 @@ describe("TrimTool", () => {
   });
 
   it("spots trimming with capitalization", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("  bob dole", "BOB DOLE"));
     bm.train(eg("space monkey planet  ", "SPACE MONKEY PLANET"));
     const test = eg("  for shame  ", "FOR SHAME");
@@ -208,7 +209,7 @@ describe("TrimTool", () => {
 describe("FragmentTheory", () => {
 
   it("spots character replacement", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("aaaabbbb", "....----"));
     bm.train(eg("abababab", ".-.-.-.-"));
     bm.train(eg("aabb", "..--"));
@@ -218,7 +219,7 @@ describe("FragmentTheory", () => {
   });
 
   it("spots single character replacement", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("grew", "gre!"));
     bm.train(eg("wild", "!ild"));
     bm.train(eg("wow", "!o!"));
@@ -229,7 +230,7 @@ describe("FragmentTheory", () => {
   });
 
   it("spots single character replacement", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("grew", "gre!"));
     bm.train(eg("wild", "!ild"));
     bm.train(eg("wow", "!o!"));
@@ -240,7 +241,7 @@ describe("FragmentTheory", () => {
   });
 
   it("spots single character replacement with capitalization", () => {
-    const bm = new BasicMuse();
+    const bm = getMuse();
     bm.train(eg("grew", "GRE!"));
     bm.train(eg("wild", "!ILD"));
     bm.train(eg("wow", "!O!"));
