@@ -1,6 +1,7 @@
 Guess data transformations.  Just a toy as yet.  See tests for transformations implemented.
 
 ```typescript
+var smalldata = require("smalldata");
 var transform = new smalldata.Transform([
       [" jane tzu", "Jane Tzu!"],
       ["tom smith ", "Tom Smith!"],

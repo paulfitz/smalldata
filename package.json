@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/paulfitz/smalldata#readme",
   "files": [
+    "bin/",
     "dist/lib/"
   ],
   "nyc": {
