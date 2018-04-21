@@ -1,0 +1,56 @@
+{
+  "name": "smalldata",
+  "version": "0.1.1",
+  "description": "Guessing data transformations for small data",
+  "main": "dist/lib/smalldata",
+  "typings": "dist/lib/smalldata",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "tsc && nyc mocha -R list test/",
+    "preversion": "npm test",
+    "version": "npm run build"
+  },
+  "bin": {
+    "smalldata": "bin/smalldata"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulfitz/smalldata.git"
+  },
+  "keywords": [
+    "small",
+    "data"
+  ],
+  "author": "Paul Fitzpatrick",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paulfitz/smalldata/issues"
+  },
+  "homepage": "https://github.com/paulfitz/smalldata#readme",
+  "files": [
+    "dist/lib/"
+  ],
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chai": "^4.0.8",
+    "@types/chai-as-promised": "^7.1.0",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.57",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.0",
+    "mocha": "^3.5.3",
+    "nyc": "^11.4.1",
+    "ts-node": "^4.0.1",
+    "typescript": "^2.6.2"
+  }
+}
