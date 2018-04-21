@@ -1,7 +1,7 @@
 import {IExample, IOutput, IInput, ITheory} from './ITheory';
 
 export class ConstantTheory implements ITheory {
-  private _value: string|null = null;
+  private _value: any|null = null;
 
   public predict(input: IInput): IOutput {
     if (this._value) { return {value: this._value}; }
@@ -16,4 +16,3 @@ export class ConstantTheory implements ITheory {
     return "constant";
   }
 }
-

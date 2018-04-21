@@ -265,3 +265,20 @@ describe("Transform", () => {
   });
 
 });
+
+
+describe("types", () => {
+
+  it("tolerates non-strings", () => {
+    const tr = new Transform([
+      ["tom! ", "tom"],
+      ["g r e en!", "green"],
+      [1, 1],
+      [null, null],
+    ]);
+    const result = tr.apply(["  jeff thing! ", "garden hose"]);
+    assert.deepEqual(["jeffthing", "gardenhose"], result);
+  });
+
+});
+

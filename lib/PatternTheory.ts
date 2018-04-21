@@ -37,12 +37,12 @@ export class SuffixTool {
     if (data.length < 2 ) {
       return PatternState.NotFound;
     }
-    let suffix = data[0].output.value;
+    let suffix = String(data[0].output.value);
     let minLen = suffix.length;
     while (suffix.length > 0) {
       let fail = false;
       for (let i=0; i<data.length; i++) {
-        const str = data[i].output.value;
+        const str = String(data[i].output.value);
         if (str.length < minLen) {
           minLen = str.length;
         }
@@ -94,12 +94,12 @@ export class PrefixTool {
     if (data.length < 2 ) {
       return PatternState.NotFound;
     }
-    let prefix = data[0].output.value;
+    let prefix = String(data[0].output.value);
     let minLen = prefix.length;
     while (prefix.length > 0) {
       let fail = false;
       for (let i=0; i<data.length; i++) {
-        const str = data[i].output.value;
+        const str = String(data[i].output.value);
         if (str.length < minLen) {
           minLen = str.length;
         }
@@ -158,8 +158,8 @@ export class RemovalTool {
     const left = new Set<string>();
     const right = new Set<string>();
     for (let i=0; i<data.length; i++) {
-      const pre = data[i].input.value;
-      const post = data[i].output.value;
+      const pre = String(data[i].input.value);
+      const post = String(data[i].output.value);
       for (const ch of pre) { left.add(ch.toUpperCase()); left.add(ch.toLowerCase()); }
       for (const ch of post) { right.add(ch.toUpperCase()); right.add(ch.toLowerCase()); }
     }
@@ -199,8 +199,8 @@ export class TrimTool {
     }
     let ct = 0;
     for (let i=0; i<data.length; i++) {
-      const pre = data[i].input.value;
-      const post = data[i].output.value;
+      const pre = String(data[i].input.value);
+      const post = String(data[i].output.value);
       if (pre.length === 0) { continue; }
       if (pre.charAt(0) === ' ' && ((post.charAt(0) || ' ') !== ' ')) {
         ct++;

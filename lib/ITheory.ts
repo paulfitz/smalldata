@@ -1,9 +1,9 @@
 export interface IInput {
-  value: string;
+  value: any;
 }
 
 export interface IOutput {
-  value: string;
+  value: any;
   abstain?: boolean;
 }
 

@@ -23,10 +23,10 @@ export class BasicMuse extends ScoringMuse {
   public constructor() {
     super();
     this.addTheory(new SimpleTheory(x => x, "identity"));
-    this.addTheory(new SimpleTheory(x => x.toUpperCase(), "upper"));
-    this.addTheory(new SimpleTheory(x => x.toLowerCase(), "lower"));
-    this.addTheory(new SimpleTheory(x => titleCase(x), "title"));
-    this.addTheory(new SimpleTheory(x => capAtStart(x), "capAtStart"));
+    this.addTheory(new SimpleTheory(x => String(x).toUpperCase(), "upper"));
+    this.addTheory(new SimpleTheory(x => String(x).toLowerCase(), "lower"));
+    this.addTheory(new SimpleTheory(x => titleCase(String(x)), "title"));
+    this.addTheory(new SimpleTheory(x => capAtStart(String(x)), "capAtStart"));
     this.addTheory(new PastTheory());
     this.addTheory(new ConstantTheory());
     this.addTheory(new PatternTheory(new SuffixTool()));

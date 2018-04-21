@@ -1,10 +1,10 @@
 import {IExample, IOutput, IInput, ITheory} from './ITheory';
 
 export class PastTheory implements ITheory {
-  private _past = new Map<string, string>();
+  private _past = new Map<string, any>();
 
   public predict(input: IInput): IOutput {
-    const curr = input.value;
+    const curr = String(input.value);
     const guess = this._past.get(curr);
     if (guess) { return {value: guess}; }
     return {value: "", abstain: true};

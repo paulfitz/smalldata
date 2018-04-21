@@ -10,7 +10,7 @@ export class FragmentTheory implements ITheory {
     if (!this._subTheory) {
       return { value: '', abstain: true };
     }
-    const pre = input.value;
+    const pre = String(input.value);
     const w = pre.length - this._window + 1;
     let result = "";
     let fail = false;
@@ -33,8 +33,8 @@ export class FragmentTheory implements ITheory {
   }
 
   public train(example: IExample): void {
-    const pre = example.input.value;
-    const post = example.output.value;
+    const pre = String(example.input.value);
+    const post = String(example.output.value);
     const w = Math.min(pre.length, post.length) - this._window;
     if (!this._subTheory) {
       this._subTheory = getNestedMuse();
