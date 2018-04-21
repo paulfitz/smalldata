@@ -1,4 +1,4 @@
-import {IExample, IOutput, IState, ITheory} from './ITheory';
+import {IExample, IOutput, IInput, ITheory} from './ITheory';
 
 class ScoredTheory {
   private _hits: number;
@@ -10,11 +10,11 @@ class ScoredTheory {
     return this._hits / Math.max(this._hits + this._misses, 1);
   }
   public score(example: IExample) {
-    const pred = this.theory.predict(example.state);
+    const pred = this.theory.predict(example.input);
     if (pred.abstain) {
       return 0;
     } else {
-      if (pred.after === example.after.after) {
+      if (pred.value === example.output.value) {
         this._hits++;
       } else {
         this._misses++;
@@ -56,11 +56,11 @@ export class ScoringMuse implements ITheory {
     return best ? best.theory : null;
   }
 
-  public predict(state: IState): IOutput {
+  public predict(input: IInput): IOutput {
     let bestPred: IOutput|null = null;
     let bestScore = -1.0;
     for (const option of this._theories) {
-      const pred = option.theory.predict(state);
+      const pred = option.theory.predict(input);
       if (pred.abstain) { continue; }
       const score = option.getScore();
       if (score > bestScore) {
@@ -68,7 +68,7 @@ export class ScoringMuse implements ITheory {
         bestPred = pred;
       }
     }
-    return bestPred || { after: "?", abstain: true };
+    return bestPred || { value: "?", abstain: true };
   }
 }
 

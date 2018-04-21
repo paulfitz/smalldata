@@ -1,15 +1,15 @@
-import {IExample, IOutput, IState, ITheory} from './ITheory';
+import {IExample, IOutput, IInput, ITheory} from './ITheory';
 
 export class ConstantTheory implements ITheory {
   private _value: string|null = null;
 
-  public predict(state: IState): IOutput {
-    if (this._value) { return {after: this._value}; }
-    return {after: "", abstain: true};
+  public predict(input: IInput): IOutput {
+    if (this._value) { return {value: this._value}; }
+    return {value: "", abstain: true};
   }
 
   public train(example: IExample): void {
-    this._value = this._value || example.after.after;
+    this._value = this._value || example.output.value;
   }  
 
   public getName(): string {

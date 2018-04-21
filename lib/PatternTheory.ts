@@ -1,4 +1,4 @@
-import {getNestedMuse, IExample, IOutput, IState, ITheory} from './ITheory';
+import {getNestedMuse, IExample, IOutput, IInput, ITheory} from './ITheory';
 
 export enum PatternState {
   NotFound = 0,
@@ -20,15 +20,15 @@ export class SuffixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      after: output.after + this.suffix
+      value: output.value + this.suffix
     };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      state: example.state,
-      after: {
-        after: example.after.after.split(this.suffix)[0]
+      input: example.input,
+      output: {
+        value: example.output.value.split(this.suffix)[0]
       }
     };
   }
@@ -37,12 +37,12 @@ export class SuffixTool {
     if (data.length < 2 ) {
       return PatternState.NotFound;
     }
-    let suffix = data[0].after.after;
+    let suffix = data[0].output.value;
     let minLen = suffix.length;
     while (suffix.length > 0) {
       let fail = false;
       for (let i=0; i<data.length; i++) {
-        const str = data[i].after.after;
+        const str = data[i].output.value;
         if (str.length < minLen) {
           minLen = str.length;
         }
@@ -77,15 +77,15 @@ export class PrefixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      after: this.prefix + output.after
+      value: this.prefix + output.value
     };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      state: example.state,
-      after: {
-        after: example.after.after.split(this.prefix)[1] || ""
+      input: example.input,
+      output: {
+        value: example.output.value.split(this.prefix)[1] || ""
       }
     };
   }
@@ -94,12 +94,12 @@ export class PrefixTool {
     if (data.length < 2 ) {
       return PatternState.NotFound;
     }
-    let prefix = data[0].after.after;
+    let prefix = data[0].output.value;
     let minLen = prefix.length;
     while (prefix.length > 0) {
       let fail = false;
       for (let i=0; i<data.length; i++) {
-        const str = data[i].after.after;
+        const str = data[i].output.value;
         if (str.length < minLen) {
           minLen = str.length;
         }
@@ -141,13 +141,13 @@ export class RemovalTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { after: this.strip(output.after) };
+    return { value: this.strip(output.value) };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      state: {before: this.strip(example.state.before)},
-      after: example.after
+      input: {value: this.strip(example.input.value)},
+      output: example.output
     };
   }
 
@@ -158,8 +158,8 @@ export class RemovalTool {
     const left = new Set<string>();
     const right = new Set<string>();
     for (let i=0; i<data.length; i++) {
-      const pre = data[i].state.before;
-      const post = data[i].after.after;
+      const pre = data[i].input.value;
+      const post = data[i].output.value;
       for (const ch of pre) { left.add(ch.toUpperCase()); left.add(ch.toLowerCase()); }
       for (const ch of post) { right.add(ch.toUpperCase()); right.add(ch.toLowerCase()); }
     }
@@ -183,13 +183,13 @@ export class TrimTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { after: this.strip(output.after) };
+    return { value: this.strip(output.value) };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      state: {before: this.strip(example.state.before)},
-      after: example.after
+      input: {value: this.strip(example.input.value)},
+      output: example.output
     };
   }
 
@@ -199,8 +199,8 @@ export class TrimTool {
     }
     let ct = 0;
     for (let i=0; i<data.length; i++) {
-      const pre = data[i].state.before;
-      const post = data[i].after.after;
+      const pre = data[i].input.value;
+      const post = data[i].output.value;
       if (pre.length === 0) { continue; }
       if (pre.charAt(0) === ' ' && ((post.charAt(0) || ' ') !== ' ')) {
         ct++;
@@ -223,10 +223,10 @@ export class PatternTheory implements ITheory {
   public constructor(private _tool: IPattern) {
   }
 
-  public predict(state: IState): IOutput {
+  public predict(input: IInput): IOutput {
     const success = this._tool.derive(this._data);
     if (!success) {
-      return {after: "", abstain: true};
+      return {value: "", abstain: true};
     }
     if (success === PatternState.Changed || !this._subTheory) {
       this._subTheory = getNestedMuse();
@@ -234,7 +234,7 @@ export class PatternTheory implements ITheory {
         this._subTheory.train(this._tool.reverse(eg));
       }
     }
-    const part = this._subTheory.predict(state);
+    const part = this._subTheory.predict(input);
     return this._tool.forward(part);
   }
 

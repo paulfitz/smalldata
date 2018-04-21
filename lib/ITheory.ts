@@ -1,19 +1,19 @@
-export interface IState {
-  before: string;
+export interface IInput {
+  value: string;
 }
 
 export interface IOutput {
-  after: string;
+  value: string;
   abstain?: boolean;
 }
 
 export interface IExample {
-  state: IState;
-  after: IOutput;
+  input: IInput;
+  output: IOutput;
 }
 
 export interface ITheory {
-  predict(state: IState): IOutput;
+  predict(input: IInput): IOutput;
   train(example: IExample): void;
   getName(): string;
 }
