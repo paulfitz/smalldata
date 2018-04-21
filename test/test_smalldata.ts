@@ -1,8 +1,7 @@
 import {assert, use} from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 
-import {IExample} from '../lib/ITheory';
-import {getMuse, Transform} from '../lib/smalldata';
+import {addTheory, getMuse, IExample, SimpleTheory, Transform} from '../lib/smalldata';
 
 use(chaiAsPromised);
 
@@ -279,6 +278,27 @@ describe("types", () => {
     const result = tr.apply(["  jeff thing! ", "garden hose"]);
     assert.deepEqual(["jeffthing", "gardenhose"], result);
   });
-
 });
 
+
+describe("addTheory", () => {
+
+  it("can plugin extra theories", () => {
+
+    function zipifyUnitedStates(x: any) {
+      const s = String(x);
+      return "00000".substr(0, 5 - s.length) + s;
+    }
+    addTheory(() => new SimpleTheory(zipifyUnitedStates, 'zip-us'));
+
+    const tr = new Transform([
+      ["02139", "zipcode 02139"],
+      [2138, "zipcode 02138"],
+      ["29123", "zipcode 29123"],
+      ["10000", "zipcode 10000"],
+    ]);
+    const result = tr.apply([7149, "50123"]);
+    assert.deepEqual(["zipcode 07149", "zipcode 50123"], result);
+  });
+
+});

@@ -1,6 +1,9 @@
 import {BasicMuse} from './BasicMuse';
 import {getNestedMuse, ITheory, setMuseMaker} from './ITheory';
 
+export * from './ITheory';
+export {SimpleTheory} from './SimpleTheory';
+
 export function getMuse(): ITheory {
   setMuseMaker(() => new BasicMuse());
   return getNestedMuse();

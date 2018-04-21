@@ -19,6 +19,7 @@ export interface ITheory {
 }
 
 let museMaker: () => ITheory;
+const theoryMakers: (() => ITheory)[] = [];
 
 export function setMuseMaker(maker: () => ITheory) {
   museMaker = maker;
@@ -28,3 +29,10 @@ export function getNestedMuse(): ITheory {
   return museMaker();
 }
 
+export function addTheory(maker: () => ITheory) {
+  theoryMakers.push(maker);
+}
+
+export function getTheoryPlugins(): (() => ITheory)[] {
+  return theoryMakers;
+}

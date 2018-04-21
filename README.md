@@ -13,3 +13,25 @@ var transform = new smalldata.Transform([
 console.log(transform.apply(["  jeff thing ", "garden hose"]));
 // shows "Jeff Thing!", "Garden Hose!"
 ```
+
+Extensible.  You can add your own theories that will be used when data justifies them.
+They will combine with existing theories.
+
+```typescript
+import {addTheory, Transform} from 'smalldata';
+
+function zipifyUnitedStates(x: any) {
+  const s = String(x);
+  return "00000".substr(0, 5 - s.length) + s;
+}
+addTheory(() => new SimpleTheory(zipifyUnitedStates, 'zip-us'));
+
+const tr = new Transform([
+ ["02139", "zipcode 02139"],
+ [2138, "zipcode 02138"],
+ ["29123", "zipcode 29123"],
+ ["10000", "zipcode 10000"],
+]);
+const result = tr.apply([7149]);
+assert.deepEqual(["zipcode 07149"], result);
+```
