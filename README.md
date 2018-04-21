@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/paulfitz/smalldata.svg?branch=master)](https://travis-ci.org/paulfitz/smalldata)
+[![npm version](https://badge.fury.io/js/smalldata.svg)](https://badge.fury.io/js/smalldata)
+
 Guess data transformations.  Just a toy as yet.  See tests for transformations implemented.
 
 ```typescript
