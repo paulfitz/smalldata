@@ -13,16 +13,14 @@ export class Transform {
   private _muse = getMuse();
 
   constructor(public examples: [any, any][]) {
-    for (const eg of examples) {
-      this._muse.train({
-        input: {value: "" + eg[0]},
-        output: {value: "" + eg[1]}
-      });
-    }
+    this._muse.train(examples.map(eg => ({
+      input: {value: eg[0]},
+      output: {value: eg[1]}
+    })));
   }
 
   public apply(inputs: any[]): any[] {
-    return inputs.map(input => this._muse.predict({value: "" + input}).value);
+    return this._muse.predict(inputs.map(input => ({value: "" + input}))).map(x => x.value);
   }
 }
 
@@ -37,9 +35,9 @@ export function main() {
   for (const example of examples) {
     const parts = example.split(':', 2);
     if (parts[1]) {
-      bm.train({input: {value: parts[0]}, output: {value: parts[1]}});
+      bm.train([{input: {value: parts[0]}, output: {value: parts[1]}}]);
     } else {
-      console.log(parts[0], ':', bm.predict({value: parts[0]}).value);
+      console.log(parts[0], ':', bm.predict([{value: parts[0]}])[0].value);
     }
   }
 }

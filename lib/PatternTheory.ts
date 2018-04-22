@@ -20,7 +20,7 @@ export class SuffixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      value: output.value + this.suffix
+      value: String(output.value) + this.suffix
     };
   }
 
@@ -28,7 +28,7 @@ export class SuffixTool {
     return {
       input: example.input,
       output: {
-        value: example.output.value.split(this.suffix)[0]
+        value: String(example.output.value).split(this.suffix)[0]
       }
     };
   }
@@ -77,7 +77,7 @@ export class PrefixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      value: this.prefix + output.value
+      value: this.prefix + String(output.value)
     };
   }
 
@@ -85,7 +85,7 @@ export class PrefixTool {
     return {
       input: example.input,
       output: {
-        value: example.output.value.split(this.prefix)[1] || ""
+        value: String(example.output.value).split(this.prefix)[1] || ""
       }
     };
   }
@@ -141,12 +141,12 @@ export class RemovalTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { value: this.strip(output.value) };
+    return { value: this.strip(String(output.value)) };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      input: {value: this.strip(example.input.value)},
+      input: {value: this.strip(String(example.input.value))},
       output: example.output
     };
   }
@@ -183,12 +183,12 @@ export class TrimTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { value: this.strip(output.value) };
+    return { value: this.strip(String(output.value)) };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      input: {value: this.strip(example.input.value)},
+      input: {value: this.strip(String(example.input.value))},
       output: example.output
     };
   }
@@ -223,26 +223,34 @@ export class PatternTheory implements ITheory {
   public constructor(private _tool: IPattern) {
   }
 
-  public predict(input: IInput): IOutput {
-    const success = this._tool.derive(this._data);
-    if (!success) {
-      return {value: "", abstain: true};
-    }
-    if (success === PatternState.Changed || !this._subTheory) {
-      this._subTheory = getNestedMuse();
-      for (const eg of this._data) {
-        this._subTheory.train(this._tool.reverse(eg));
+  public predict(inputs: IInput[]): IOutput[] {
+    return inputs.map(input => {
+      const success = this._tool.derive(this._data);
+      if (!success) {
+        return {value: "", abstain: true};
       }
-    }
-    const part = this._subTheory.predict(input);
-    return this._tool.forward(part);
+      if (success === PatternState.Changed || !this._subTheory) {
+        this._subTheory = getNestedMuse();
+        for (const eg of this._data) {
+          this._subTheory.train([this._tool.reverse(eg)]);
+        }
+      }
+      const [part] = this._subTheory.predict([input]);
+      return this._tool.forward(part);
+    });
   }
 
-  public train(example: IExample): void {
-    this._data.push(example);
-    if (this._subTheory) {
-      this._subTheory.train(this._tool.reverse(example));
+  public train(examples: IExample[]): void {
+    for (const example of examples) {
+      this._data.push(example);
+      if (this._subTheory) {
+        this._subTheory.train([this._tool.reverse(example)]);
+      }
     }
+  }
+
+  public trainable(): boolean {
+    return true;
   }
 
   public getName(): string {

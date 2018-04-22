@@ -13,8 +13,9 @@ export interface IExample {
 }
 
 export interface ITheory {
-  predict(input: IInput): IOutput;
-  train(example: IExample): void;
+  predict(inputs: IInput[]): IOutput[];
+  train(examples: IExample[]): void;
+  trainable(): boolean;
   getName(): string;
 }
 
