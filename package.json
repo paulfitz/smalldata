@@ -1,6 +1,6 @@
 {
   "name": "smalldata",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Guessing data transformations for small data",
   "main": "dist/lib/smalldata",
   "typings": "dist/lib/smalldata",
