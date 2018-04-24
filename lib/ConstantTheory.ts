@@ -20,6 +20,10 @@ export class ConstantTheory implements ITheory {
     return true;
   }
 
+  public reset() {
+    this._value = null;
+  }
+
   public getName(): string {
     return "constant";
   }

@@ -17,6 +17,7 @@ export interface ITheory {
   train(examples: IExample[]): void;
   trainable(): boolean;
   getName(): string;
+  reset(): void;
 }
 
 let museMaker: () => ITheory;

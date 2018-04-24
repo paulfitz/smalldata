@@ -34,7 +34,7 @@ export class SuffixTool {
   }
 
   public derive(data: IExample[]): PatternState {
-    if (data.length < 2 ) {
+    if (data.length < 1) {
       return PatternState.NotFound;
     }
     let suffix = String(data[0].output.value);
@@ -91,7 +91,7 @@ export class PrefixTool {
   }
 
   public derive(data: IExample[]): PatternState {
-    if (data.length < 2 ) {
+    if (data.length < 1) {
       return PatternState.NotFound;
     }
     let prefix = String(data[0].output.value);
@@ -152,7 +152,7 @@ export class RemovalTool {
   }
 
   public derive(data: IExample[]): PatternState {
-    if (data.length < 1 ) {
+    if (data.length < 1) {
       return PatternState.NotFound;
     }
     const left = new Set<string>();
@@ -160,6 +160,7 @@ export class RemovalTool {
     for (let i=0; i<data.length; i++) {
       const pre = String(data[i].input.value);
       const post = String(data[i].output.value);
+      if (pre.length === post.length) { continue; }
       for (const ch of pre) { left.add(ch.toUpperCase()); left.add(ch.toLowerCase()); }
       for (const ch of post) { right.add(ch.toUpperCase()); right.add(ch.toLowerCase()); }
     }
@@ -194,7 +195,7 @@ export class TrimTool {
   }
 
   public derive(data: IExample[]): PatternState {
-    if (data.length < 1 ) {
+    if (data.length < 1) {
       return PatternState.NotFound;
     }
     let ct = 0;
@@ -217,23 +218,19 @@ export class TrimTool {
 }
 
 export class PatternTheory implements ITheory {
-  private _data = new Array<IExample>();
   private _subTheory: ITheory | null = null;
 
   public constructor(private _tool: IPattern) {
   }
 
+  public reset() {
+    this._subTheory = null;
+  }
+
   public predict(inputs: IInput[]): IOutput[] {
     return inputs.map(input => {
-      const success = this._tool.derive(this._data);
-      if (!success) {
+      if (!this._subTheory) {
         return {value: "", abstain: true};
-      }
-      if (success === PatternState.Changed || !this._subTheory) {
-        this._subTheory = getNestedMuse();
-        for (const eg of this._data) {
-          this._subTheory.train([this._tool.reverse(eg)]);
-        }
       }
       const [part] = this._subTheory.predict([input]);
       return this._tool.forward(part);
@@ -241,11 +238,10 @@ export class PatternTheory implements ITheory {
   }
 
   public train(examples: IExample[]): void {
-    for (const example of examples) {
-      this._data.push(example);
-      if (this._subTheory) {
-        this._subTheory.train([this._tool.reverse(example)]);
-      }
+    const success = this._tool.derive(examples);
+    if (success !== PatternState.NotFound) {
+      this._subTheory = getNestedMuse();
+      this._subTheory.train(examples.map(eg => this._tool.reverse(eg)));
     }
   }
 

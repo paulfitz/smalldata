@@ -35,25 +35,35 @@ export class FragmentTheory implements ITheory {
   }
 
   public train(examples: IExample[]): void {
+    const nestedExamples: IExample[] = [];
     for (const example of examples) {
       const pre = String(example.input.value);
       const post = String(example.output.value);
       const w = Math.min(pre.length, post.length) - this._window;
-      if (!this._subTheory) {
-        this._subTheory = getNestedMuse();
-      }
       for (let i=0; i<w; i++) {
         const eg = {
           input: {value: pre.substr(i, this._window)},
           output: {value: post.substr(i, this._window)}
         }
-        this._subTheory.train([eg]);
+        nestedExamples.push(eg);
       }
+    }
+    if (nestedExamples.length > 0) {
+      if (!this._subTheory) {
+        this._subTheory = getNestedMuse();
+      }
+      this._subTheory.train(nestedExamples);
     }
   }
 
   public trainable(): boolean {
     return true;
+  }
+
+  public reset() {
+    if (this._subTheory) {
+      this._subTheory.reset();
+    }
   }
 
   public getName(): string {

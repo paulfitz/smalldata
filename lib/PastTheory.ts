@@ -3,6 +3,10 @@ import {IExample, IOutput, IInput, ITheory} from './ITheory';
 export class PastTheory implements ITheory {
   private _past = new Map<string, any>();
 
+  public reset() {
+    this._past.clear();
+  }
+
   public predict(inputs: IInput[]): IOutput[] {
     return inputs.map(input => {
       const curr = String(input.value);

@@ -1,6 +1,7 @@
 import {IExample, IOutput, IInput, ITheory} from './ITheory';
+import {shuffle} from 'lodash';
 
-class ScoredTheory {
+export class ScoredTheory {
   private _hits: number;
   private _misses: number;
   public constructor(public theory: ITheory) {
@@ -31,12 +32,66 @@ export class ScoringMuse implements ITheory {
     this._theories.push(new ScoredTheory(theory));
   }
 
-  public train(examples: IExample[]) {
-    for (const example of examples) {
-      for (const option of this._theories) {
-        option.score(example);
-        option.theory.train([example]);
+  public incrementalScore(option: ScoredTheory, examples: IExample[]) {
+    for (let i=0; i<examples.length; i++) {
+      const trainingData = examples.slice(0, i);
+      option.theory.reset();
+      if (i > 0) {
+        option.theory.train(trainingData);
       }
+      option.score(examples[i]);
+    }
+    option.theory.reset();
+    option.theory.train(examples);
+  }
+
+  public leaveOneOutScore(option: ScoredTheory, examples: IExample[]) {
+    for (let i=0; i<examples.length; i++) {
+      const trainingData = examples.slice(0, i).concat(examples.slice(i + 1)); 
+      option.theory.reset();
+      option.theory.train(trainingData);
+      option.score(examples[i]);
+    }
+    option.theory.reset();
+    option.theory.train(examples);
+  }
+
+  public splitScore(option: ScoredTheory, examples: IExample[], nsplits: number) {
+    const n = examples.length;
+    const egs = shuffle(examples).map((val, idx) => [val, Math.floor(nsplits * idx / n)] as
+                                      [IExample, number]);
+    for (let s=0; s<nsplits; s++) {
+      const trainingData = egs.filter(([val, key]) => key !== s).map(([val, key]) => val);
+      const validationData = egs.filter(([val, key]) => key === s).map(([val, key]) => val);
+      option.theory.reset();
+      option.theory.train(trainingData);
+      for (const eg of validationData) {
+        option.score(eg);
+      }
+    }
+    option.theory.reset();
+    option.theory.train(examples);
+  }
+
+  public train(examples: IExample[]) {
+    for (const option of this._theories) {
+      if (option.theory.trainable()) {
+        if (examples.length < 20) {
+          this.leaveOneOutScore(option, examples);
+        } else if (examples.length >= 20) {
+          this.splitScore(option, examples, 5);
+        //} else {
+          //this.incrementalScore(option, examples);
+        }
+      } else {
+        examples.forEach(eg => option.score(eg));
+      }
+    }
+  }
+
+  public reset() {
+    for (const option of this._theories) {
+      option.theory.reset();
     }
   }
 
