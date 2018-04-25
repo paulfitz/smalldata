@@ -15,6 +15,7 @@ export interface IExample {
 export interface ITheory {
   predict(inputs: IInput[]): IOutput[];
   train(examples: IExample[]): void;
+  leak(examples: IExample[], validation: IExample[]): boolean;
   trainable(): boolean;
   getName(): string;
   reset(): void;

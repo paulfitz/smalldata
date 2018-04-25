@@ -9,6 +9,9 @@ export class SimpleTheory implements ITheory {
   public train(example: IExample[]): void {
     //
   }
+  public leak(examples: IExample[], validation: IExample[]): boolean {
+    return false;
+  }
   public reset() {
     //
   }

@@ -14,9 +14,6 @@ export interface IPattern {
 
 export class SuffixTool {
   public suffix: string = "";
-  constructor() {
-    //
-  }
 
   public forward(output: IOutput): IOutput {
     return {
@@ -25,10 +22,13 @@ export class SuffixTool {
   }
 
   public reverse(example: IExample): IExample {
+    let v = String(example.output.value);
+    const i = v.lastIndexOf(this.suffix);
+    if (i >= 0) { v = v.substr(0, i); }
     return {
       input: example.input,
       output: {
-        value: String(example.output.value).split(this.suffix)[0]
+        value: v
       }
     };
   }
@@ -36,6 +36,9 @@ export class SuffixTool {
   public derive(data: IExample[]): PatternState {
     if (data.length < 1) {
       return PatternState.NotFound;
+    }
+    if (this.deriveIO(data) === PatternState.Found) {
+      return PatternState.Found;
     }
     let suffix = String(data[0].output.value);
     let minLen = suffix.length;
@@ -67,13 +70,31 @@ export class SuffixTool {
     this.suffix = suffix;
     return result;
   }
+
+  public deriveIO(data: IExample[]): PatternState {
+    if (data.length < 1) {
+      return PatternState.NotFound;
+    }
+    const pre = String(data[0].input.value);
+    const post = String(data[0].output.value);
+    if (pre.length >= post.length) {
+      return PatternState.NotFound;
+    }
+    const suffix = post.substr(pre.length);
+    for (let i=0; i<data.length; i++) {
+      const ipre = String(data[i].input.value).toLowerCase();
+      const ipost = String(data[i].output.value).toLowerCase();
+      if (ipost !== ipre + suffix) {
+        return PatternState.NotFound;
+      }
+    }
+    this.suffix = suffix;
+    return PatternState.Found;
+  }
 }
 
 export class PrefixTool {
   public prefix: string = "";
-  constructor() {
-    //
-  }
 
   public forward(output: IOutput): IOutput {
     return {
@@ -82,10 +103,13 @@ export class PrefixTool {
   }
 
   public reverse(example: IExample): IExample {
+    let v = String(example.output.value);
+    const i = v.indexOf(this.prefix);
+    if (i === 0) { v = v.substr(this.prefix.length); }
     return {
       input: example.input,
       output: {
-        value: String(example.output.value).split(this.prefix)[1] || ""
+        value: v
       }
     };
   }
@@ -93,6 +117,9 @@ export class PrefixTool {
   public derive(data: IExample[]): PatternState {
     if (data.length < 1) {
       return PatternState.NotFound;
+    }
+    if (this.deriveIO(data) === PatternState.Found) {
+      return PatternState.Found;
     }
     let prefix = String(data[0].output.value);
     let minLen = prefix.length;
@@ -124,18 +151,36 @@ export class PrefixTool {
     this.prefix = prefix;
     return result;
   }
+
+  public deriveIO(data: IExample[]): PatternState {
+    if (data.length < 1) {
+      return PatternState.NotFound;
+    }
+    const pre = String(data[0].input.value);
+    const post = String(data[0].output.value);
+    if (pre.length >= post.length) {
+      return PatternState.NotFound;
+    }
+    const prefix = post.substr(0, post.length - pre.length);
+    for (let i=0; i<data.length; i++) {
+      const ipre = String(data[i].input.value).toLowerCase();
+      const ipost = String(data[i].output.value).toLowerCase();
+      if (ipost !== prefix + ipre) {
+        return PatternState.NotFound;
+      }
+    }
+    this.prefix = prefix;
+    return PatternState.Found;
+  }
 }
 
 export class RemovalTool {
   public dead = new Set<string>();
-  constructor() {
-    //
-  }
 
   public strip(str: string): string {
     let result = "";
     for (const ch of str) {
-      if (!this.dead.has(ch)) { result += ch; }
+      if (!this.dead.has(ch.toLowerCase())) { result += ch; }
     }
     return result;
   }
@@ -158,11 +203,12 @@ export class RemovalTool {
     const left = new Set<string>();
     const right = new Set<string>();
     for (let i=0; i<data.length; i++) {
-      const pre = String(data[i].input.value);
-      const post = String(data[i].output.value);
+      const pre = String(data[i].input.value).toLowerCase();
+      const post = String(data[i].output.value).toLowerCase();
       if (pre.length === post.length) { continue; }
-      for (const ch of pre) { left.add(ch.toUpperCase()); left.add(ch.toLowerCase()); }
-      for (const ch of post) { right.add(ch.toUpperCase()); right.add(ch.toLowerCase()); }
+      if (post.length === 0) { continue; }
+      for (const ch of pre) { left.add(ch); }
+      for (const ch of post) { right.add(ch); }
     }
     const dead = new Set<string>([...left].filter(x => !right.has(x)));
     if (dead.size === 0) {
@@ -175,9 +221,6 @@ export class RemovalTool {
 }
 
 export class TrimTool {
-  constructor() {
-    //
-  }
 
   public strip(str: string): string {
     return str.trim();
@@ -243,6 +286,16 @@ export class PatternTheory implements ITheory {
       this._subTheory = getNestedMuse();
       this._subTheory.train(examples.map(eg => this._tool.reverse(eg)));
     }
+  }
+
+  public leak(examples: IExample[], validation: IExample[]): boolean {
+    const success = this._tool.derive(examples.concat(validation));
+    if (success !== PatternState.NotFound) {
+      this._subTheory = getNestedMuse();
+      this._subTheory.leak(examples.map(eg => this._tool.reverse(eg)),
+                           validation.map(eg => this._tool.reverse(eg)));
+    }
+    return true;
   }
 
   public trainable(): boolean {

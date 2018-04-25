@@ -23,6 +23,10 @@ export class PastTheory implements ITheory {
     }
   }  
 
+  public leak(examples: IExample[], validation: IExample[]): boolean {
+    return false;
+  }
+
   public trainable(): boolean {
     return true;
   }

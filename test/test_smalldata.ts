@@ -128,6 +128,16 @@ describe("SuffixTool", () => {
     assert.deepEqual(outputs(test), pred);
   });
 
+  it("spots simple suffix quickly", () => {
+    const results = mainCore(["hi:hi.", "you:"]);
+    assert.deepEqual(results, [["you", "you."]]);
+  });
+
+  it("spots suffix plus capitalization quickly", () => {
+    const results = mainCore(["hi:Hi.", "you:"]);
+    assert.deepEqual(results, [["you", "You."]]);
+  });
+
 });
 
 describe("PrefixTool", () => {
@@ -161,6 +171,16 @@ describe("PrefixTool", () => {
     const test = eg("e", "(E)");
     const pred = bm.predict(inputs(test));
     assert.deepEqual(outputs(test), pred);
+  });
+
+  it("spots simple prefix quickly", () => {
+    const results = mainCore(["hi:=hi", "you:"]);
+    assert.deepEqual(results, [["you", "=you"]]);
+  });
+
+  it("spots prefix plus capitalization quickly", () => {
+    const results = mainCore(["hi:=Hi", "you:"]);
+    assert.deepEqual(results, [["you", "=You"]]);
   });
 
 });
@@ -249,7 +269,6 @@ describe("FragmentTheory", () => {
   it("spots single character replacement", () => {
     const bm = getMuse();
     bm.train(egs([["grew", "gre!"],
-                  ["wild", "!ild"],
                   ["wow", "!o!"],
                   ["warm", "!arm"]]));
     const test = eg("beware", "be!are");
@@ -260,7 +279,6 @@ describe("FragmentTheory", () => {
   it("spots single character replacement with capitalization", () => {
     const bm = getMuse();
     bm.train(egs([["grew", "GRE!"],
-                  ["wild", "!ILD"],
                   ["wow", "!O!"],
                   ["warm", "!ARM"]]));
     const test = eg("beware", "BE!ARE");
@@ -334,9 +352,14 @@ describe("Command Line", () => {
     assert.deepEqual(results, [["you", "You"]]);
   });
 
-  it("can do capitalization plus suffix with a little sweat", () => {
-    const results = mainCore(["hi:Hix", "you:Youx", "they:Theyx", "green:"]);
-    assert.deepEqual(results, [["green", "Greenx"]]);
+  it("can do capitalization plus prefix suffix with a little sweat", () => {
+    const results = mainCore(["hi:...Hi!!!", "you:...You!!!", "green:"]);
+    assert.deepEqual(results, [["green", "...Green!!!"]]);
+  });
+
+  it("can do space monkey example in README", () => {
+    const results = mainCore(["space:[SPACE]", "monkey:[MONKEY]", "dream:", "frog:"]);
+    assert.deepEqual(results, [["dream", "[DREAM]"], ["frog", "[FROG]"]]);
   });
 
 });

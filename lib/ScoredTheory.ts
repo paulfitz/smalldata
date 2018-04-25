@@ -49,7 +49,9 @@ export class ScoringMuse implements ITheory {
     for (let i=0; i<examples.length; i++) {
       const trainingData = examples.slice(0, i).concat(examples.slice(i + 1)); 
       option.theory.reset();
-      option.theory.train(trainingData);
+      if (!option.theory.leak(trainingData, [examples[i]])) {
+        option.theory.train(trainingData);
+      }
       option.score(examples[i]);
     }
     option.theory.reset();
@@ -64,7 +66,9 @@ export class ScoringMuse implements ITheory {
       const trainingData = egs.filter(([val, key]) => key !== s).map(([val, key]) => val);
       const validationData = egs.filter(([val, key]) => key === s).map(([val, key]) => val);
       option.theory.reset();
-      option.theory.train(trainingData);
+      if (!option.theory.leak(trainingData, validationData)) {
+        option.theory.train(trainingData);
+      }
       for (const eg of validationData) {
         option.score(eg);
       }
@@ -80,13 +84,16 @@ export class ScoringMuse implements ITheory {
           this.leaveOneOutScore(option, examples);
         } else if (examples.length >= 20) {
           this.splitScore(option, examples, 5);
-        //} else {
-          //this.incrementalScore(option, examples);
         }
       } else {
         examples.forEach(eg => option.score(eg));
       }
     }
+  }
+
+  public leak(examples: IExample[], validation: IExample[]): boolean {
+    this.train(examples.concat(validation));
+    return true;
   }
 
   public reset() {

@@ -3,6 +3,13 @@
 
 Guess data transformations.  Just a toy as yet.  See tests for transformations implemented.
 
+From commandline:
+```
+$ ./bin/smalldata space:[SPACE] monkey:[MONKEY] dream: frog:
+dream:[DREAM]
+frog:[FROG]
+```
+
 ```typescript
 var smalldata = require("smalldata");
 var transform = new smalldata.Transform([
