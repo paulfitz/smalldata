@@ -2,7 +2,7 @@ import {assert, use} from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 
 import {addTheory, getMuse, IExample, IInput, IOutput, mainCore,
-  SimpleTheory, Transform, getProfiler} from '../lib/smalldata';
+  SimpleTheory, Transform} from '../lib/smalldata';
 
 use(chaiAsPromised);
 
