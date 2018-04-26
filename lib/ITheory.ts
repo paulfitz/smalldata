@@ -1,3 +1,5 @@
+import {Profile} from './Profile';
+
 export interface IInput {
   value: any;
 }
@@ -23,6 +25,7 @@ export interface ITheory {
 
 let museMaker: () => ITheory;
 const theoryMakers: (() => ITheory)[] = [];
+const profiler = new Profile();
 
 export function setMuseMaker(maker: () => ITheory) {
   museMaker = maker;
@@ -38,4 +41,8 @@ export function addTheory(maker: () => ITheory) {
 
 export function getTheoryPlugins(): (() => ITheory)[] {
   return theoryMakers;
+}
+
+export function getProfiler() {
+  return profiler;
 }

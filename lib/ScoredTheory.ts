@@ -1,4 +1,4 @@
-import {IExample, IOutput, IInput, ITheory} from './ITheory';
+import {getProfiler, IExample, IOutput, IInput, ITheory} from './ITheory';
 import {shuffle} from 'lodash';
 
 export class ScoredTheory {
@@ -80,9 +80,10 @@ export class ScoringMuse implements ITheory {
   public train(examples: IExample[]) {
     for (const option of this._theories) {
       if (option.theory.trainable()) {
-        if (examples.length < 20) {
+        getProfiler().countTrains(option.theory);
+        if (examples.length < 15) {
           this.leaveOneOutScore(option, examples);
-        } else if (examples.length >= 20) {
+        } else {
           this.splitScore(option, examples, 5);
         }
       } else {

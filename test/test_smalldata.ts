@@ -2,7 +2,7 @@ import {assert, use} from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 
 import {addTheory, getMuse, IExample, IInput, IOutput, mainCore,
-        SimpleTheory, Transform} from '../lib/smalldata';
+  SimpleTheory, Transform, getProfiler} from '../lib/smalldata';
 
 use(chaiAsPromised);
 
@@ -211,7 +211,6 @@ describe("RemovalTool", () => {
   it("spots dropped letters and capitalization and suffix", () => {
     const bm = getMuse();
     bm.train(egs([["hello world!", "hellwrld!"],
-                  ["free the space monkeys", "freethespacemnkeys!"],
                   ["sandwich", "sandwich!"]]));
     const test = eg("pool time", "pltime!");
     const pred = bm.predict(inputs(test));
