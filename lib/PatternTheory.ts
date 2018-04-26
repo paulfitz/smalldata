@@ -17,7 +17,8 @@ export class SuffixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      value: flatten(output.value) + this.suffix
+      value: flatten(output.value) + this.suffix,
+      context: output.context
     };
   }
 
@@ -28,7 +29,8 @@ export class SuffixTool {
     return {
       input: example.input,
       output: {
-        value: v
+        value: v,
+        context: example.input.context
       }
     };
   }
@@ -98,7 +100,8 @@ export class PrefixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      value: this.prefix + flatten(output.value)
+      value: this.prefix + flatten(output.value),
+      context: output.context
     };
   }
 
@@ -109,7 +112,8 @@ export class PrefixTool {
     return {
       input: example.input,
       output: {
-        value: v
+        value: v,
+        context: example.input.context
       }
     };
   }
@@ -186,12 +190,12 @@ export class RemovalTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { value: this.strip(flatten(output.value)) };
+    return { value: this.strip(flatten(output.value)), context: output.context };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      input: {value: this.strip(flatten(example.input.value))},
+      input: {value: this.strip(flatten(example.input.value)), context: example.input.context},
       output: example.output
     };
   }
@@ -227,12 +231,12 @@ export class TrimTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { value: this.strip(flatten(output.value)) };
+    return { value: this.strip(flatten(output.value)), context: output.context };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      input: {value: this.strip(flatten(example.input.value))},
+      input: {value: this.strip(flatten(example.input.value)), context: example.input.context},
       output: example.output
     };
   }
@@ -270,30 +274,34 @@ export class PatternTheory implements ITheory {
     this._subTheory = null;
   }
 
-  public predict(inputs: IInput[]): IOutput[] {
-    return inputs.map(input => {
+  public async predict(inputs: IInput[]): Promise<IOutput[]> {
+    const results: IOutput[] = [];
+    for (const input of inputs) {
       if (!this._subTheory) {
-        return {value: "", abstain: true};
+        results.push({value: "", abstain: true});
+        continue;
       }
-      const [part] = this._subTheory.predict([input]);
-      return this._tool.forward(part);
-    });
+      const [part] = await this._subTheory.predict([input]);
+      part.context = input.context;
+      results.push(this._tool.forward(part));
+    }
+    return results;
   }
 
-  public train(examples: IExample[]): void {
+  public async train(examples: IExample[]): Promise<void> {
     const success = this._tool.derive(examples);
     if (success !== PatternState.NotFound) {
       this._subTheory = getNestedMuse();
-      this._subTheory.train(examples.map(eg => this._tool.reverse(eg)));
+      await this._subTheory.train(examples.map(eg => this._tool.reverse(eg)));
     }
   }
 
-  public leak(examples: IExample[], validation: IExample[]): boolean {
+  public async leak(examples: IExample[], validation: IExample[]): Promise<boolean> {
     const success = this._tool.derive(examples.concat(validation));
     if (success !== PatternState.NotFound) {
       this._subTheory = getNestedMuse();
-      this._subTheory.leak(examples.map(eg => this._tool.reverse(eg)),
-                           validation.map(eg => this._tool.reverse(eg)));
+      await this._subTheory.leak(examples.map(eg => this._tool.reverse(eg)),
+                                 validation.map(eg => this._tool.reverse(eg)));
     }
     return true;
   }

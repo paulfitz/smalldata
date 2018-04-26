@@ -1,0 +1,13 @@
+[
+  {
+    "latitude": 42.356952,
+    "longitude": -71.093857,
+    "country": "United States",
+    "city": "Cambridge",
+    "state": "MA",
+    "streetName": "Memorial Dr",
+    "streetNumber": "305",
+    "countryCode": "US",
+    "provider": "datasciencetoolkit"
+  }
+]

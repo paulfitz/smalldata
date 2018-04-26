@@ -3,20 +3,20 @@ import {IExample, IOutput, IInput, ITheory} from './ITheory';
 export class ConstantTheory implements ITheory {
   private _value: any|null = null;
 
-  public predict(inputs: IInput[]): IOutput[] {
+  public async predict(inputs: IInput[]): Promise<IOutput[]> {
     return inputs.map(input => {
       if (this._value) { return {value: this._value}; }
       return {value: "", abstain: true};
     });
   }
 
-  public train(examples: IExample[]): void {
+  public async train(examples: IExample[]): Promise<void> {
     for (const example of examples) {
       this._value = this._value || example.output.value;
     }
   }
 
-  public leak(examples: IExample[], validation: IExample[]): boolean {
+  public async leak(examples: IExample[], validation: IExample[]): Promise<boolean> {
     return false;
   }
 

@@ -1,0 +1,13 @@
+[
+  {
+    "latitude": 38.898673,
+    "longitude": -77.03624,
+    "country": "United States",
+    "city": "Washington",
+    "state": "DC",
+    "streetName": "Pennsylvania Ave NW",
+    "streetNumber": "1600",
+    "countryCode": "US",
+    "provider": "datasciencetoolkit"
+  }
+]

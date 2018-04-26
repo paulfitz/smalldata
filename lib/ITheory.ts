@@ -1,12 +1,16 @@
 import {Profile} from './Profile';
 
+export type Context = {[key: string]: any};
+
 export interface IInput {
   value: any;
+  context?: Context;
 }
 
 export interface IOutput {
   value: any;
   abstain?: boolean;
+  context?: Context;
 }
 
 export interface IExample {
@@ -15,9 +19,9 @@ export interface IExample {
 }
 
 export interface ITheory {
-  predict(inputs: IInput[]): IOutput[];
-  train(examples: IExample[]): void;
-  leak(examples: IExample[], validation: IExample[]): boolean;
+  predict(inputs: IInput[]): Promise<IOutput[]>;
+  train(examples: IExample[]): Promise<void>;
+  leak(examples: IExample[], validation: IExample[]): Promise<boolean>;
   trainable(): boolean;
   getName(): string;
   reset(): void;
@@ -37,6 +41,10 @@ export function getNestedMuse(): ITheory {
 
 export function addTheory(maker: () => ITheory) {
   theoryMakers.push(maker);
+}
+
+export function resetTheories() {
+  theoryMakers.length = 0;
 }
 
 export function getTheoryPlugins(): (() => ITheory)[] {

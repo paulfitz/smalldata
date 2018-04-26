@@ -1,0 +1,13 @@
+[
+  {
+    "latitude": 40.72315,
+    "longitude": -74.005083,
+    "country": "United States",
+    "city": "New York",
+    "state": "NY",
+    "streetName": "6 Ave",
+    "streetNumber": "101",
+    "countryCode": "US",
+    "provider": "datasciencetoolkit"
+  }
+]

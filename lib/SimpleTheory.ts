@@ -3,13 +3,13 @@ import {IExample, IOutput, IInput, ITheory} from './ITheory';
 export class SimpleTheory implements ITheory {
   constructor(public fn: (x: any) => any, public name: string) {
   }
-  public predict(inputs: IInput[]): IOutput[] {
-    return inputs.map(input => ({ value: this.fn(input.value) }));
+  public async predict(inputs: IInput[]): Promise<IOutput[]> {
+    return inputs.map(input => ({ value: this.fn(input.value), context: input.context }));
   }
-  public train(example: IExample[]): void {
+  public async train(example: IExample[]): Promise<void> {
     //
   }
-  public leak(examples: IExample[], validation: IExample[]): boolean {
+  public async leak(examples: IExample[], validation: IExample[]): Promise<boolean> {
     return false;
   }
   public reset() {
