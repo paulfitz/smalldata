@@ -1,3 +1,4 @@
+import {DictTheory} from './DictTheory';
 import {getTheoryPlugins} from './ITheory';
 import {ScoringMuse} from './ScoredTheory';
 import {SimpleTheory} from './SimpleTheory';
@@ -35,6 +36,7 @@ export class BasicMuse extends ScoringMuse {
     this.addTheory(new PatternTheory(new RemovalTool()));
     this.addTheory(new PatternTheory(new TrimTool()));
     this.addTheory(new FragmentTheory(1));
+    this.addTheory(new DictTheory());
     for (const maker of getTheoryPlugins()) {
       this.addTheory(maker());
     }

@@ -1,4 +1,4 @@
-import {getProfiler, IExample, IOutput, IInput, ITheory} from './ITheory';
+import {flatten, getProfiler, IExample, IOutput, IInput, ITheory} from './ITheory';
 import {shuffle} from 'lodash';
 
 export class ScoredTheory {
@@ -10,12 +10,15 @@ export class ScoredTheory {
   public getScore(): number {
     return this._hits / Math.max(this._hits + this._misses, 1);
   }
+  public getStats() {
+    return [this.getScore(), this._hits, this._misses];
+  }
   public score(example: IExample) {
     const [pred] = this.theory.predict([example.input]);
     if (pred.abstain) {
       return 0;
     } else {
-      if (String(pred.value) === String(example.output.value)) {
+      if (flatten(pred.value) === flatten(example.output.value)) {
         this._hits++;
       } else {
         this._misses++;
@@ -79,8 +82,8 @@ export class ScoringMuse implements ITheory {
 
   public train(examples: IExample[]) {
     for (const option of this._theories) {
+      getProfiler().countTrains(option.theory);
       if (option.theory.trainable()) {
-        getProfiler().countTrains(option.theory);
         if (examples.length < 15) {
           this.leaveOneOutScore(option, examples);
         } else {
@@ -119,6 +122,12 @@ export class ScoringMuse implements ITheory {
       }
     }
     return best ? best.theory : null;
+  }
+
+  public showScores() {
+    for (const option of this._theories) {
+      console.log(option.theory.getName(), option.getStats());
+    }
   }
 
   public predict(inputs: IInput[]): IOutput[] {

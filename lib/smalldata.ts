@@ -20,7 +20,7 @@ export class Transform {
   }
 
   public apply(inputs: any[]): any[] {
-    return this._muse.predict(inputs.map(input => ({value: "" + input}))).map(x => x.value);
+    return this._muse.predict(inputs.map(input => ({value: input}))).map(x => x.value);
   }
 }
 

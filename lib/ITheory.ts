@@ -46,3 +46,13 @@ export function getTheoryPlugins(): (() => ITheory)[] {
 export function getProfiler() {
   return profiler;
 }
+
+export function flatten(x: any): string {
+  if (typeof x === 'string') {
+    return x;
+  }
+  if (typeof x === 'number' || x === null || typeof x === 'undefined') {
+    return String(x);
+  }
+  return JSON.stringify(x);
+}

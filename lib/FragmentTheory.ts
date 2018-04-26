@@ -1,4 +1,4 @@
-import {getNestedMuse, IExample, IOutput, IInput, ITheory} from './ITheory';
+import {flatten, getNestedMuse, IExample, IOutput, IInput, ITheory} from './ITheory';
 
 export class FragmentTheory implements ITheory {
   private _subTheory: ITheory | null = null;
@@ -11,7 +11,7 @@ export class FragmentTheory implements ITheory {
       if (!this._subTheory) {
         return { value: '', abstain: true };
       }
-      const pre = String(input.value);
+      const pre = flatten(input.value);
       const w = pre.length - this._window + 1;
       let result = "";
       let fail = false;
@@ -37,8 +37,8 @@ export class FragmentTheory implements ITheory {
   public train(examples: IExample[]): void {
     const nestedExamples: IExample[] = [];
     for (const example of examples) {
-      const pre = String(example.input.value);
-      const post = String(example.output.value);
+      const pre = flatten(example.input.value);
+      const post = flatten(example.output.value);
       const w = Math.min(pre.length, post.length) - this._window;
       for (let i=0; i<w; i++) {
         const eg = {

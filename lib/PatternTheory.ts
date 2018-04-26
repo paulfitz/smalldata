@@ -1,4 +1,4 @@
-import {getNestedMuse, IExample, IOutput, IInput, ITheory} from './ITheory';
+import {flatten, getNestedMuse, IExample, IOutput, IInput, ITheory} from './ITheory';
 
 export enum PatternState {
   NotFound = 0,
@@ -17,12 +17,12 @@ export class SuffixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      value: String(output.value) + this.suffix
+      value: flatten(output.value) + this.suffix
     };
   }
 
   public reverse(example: IExample): IExample {
-    let v = String(example.output.value);
+    let v = flatten(example.output.value);
     const i = v.lastIndexOf(this.suffix);
     if (i >= 0) { v = v.substr(0, i); }
     return {
@@ -40,12 +40,12 @@ export class SuffixTool {
     if (this.deriveIO(data) === PatternState.Found) {
       return PatternState.Found;
     }
-    let suffix = String(data[0].output.value);
+    let suffix = flatten(data[0].output.value);
     let minLen = suffix.length;
     while (suffix.length > 0) {
       let fail = false;
       for (let i=0; i<data.length; i++) {
-        const str = String(data[i].output.value);
+        const str = flatten(data[i].output.value);
         if (str.length < minLen) {
           minLen = str.length;
         }
@@ -75,15 +75,15 @@ export class SuffixTool {
     if (data.length < 1) {
       return PatternState.NotFound;
     }
-    const pre = String(data[0].input.value);
-    const post = String(data[0].output.value);
+    const pre = flatten(data[0].input.value);
+    const post = flatten(data[0].output.value);
     if (pre.length >= post.length) {
       return PatternState.NotFound;
     }
     const suffix = post.substr(pre.length);
     for (let i=0; i<data.length; i++) {
-      const ipre = String(data[i].input.value).toLowerCase();
-      const ipost = String(data[i].output.value).toLowerCase();
+      const ipre = flatten(data[i].input.value).toLowerCase();
+      const ipost = flatten(data[i].output.value).toLowerCase();
       if (ipost !== ipre + suffix) {
         return PatternState.NotFound;
       }
@@ -98,12 +98,12 @@ export class PrefixTool {
 
   public forward(output: IOutput): IOutput {
     return {
-      value: this.prefix + String(output.value)
+      value: this.prefix + flatten(output.value)
     };
   }
 
   public reverse(example: IExample): IExample {
-    let v = String(example.output.value);
+    let v = flatten(example.output.value);
     const i = v.indexOf(this.prefix);
     if (i === 0) { v = v.substr(this.prefix.length); }
     return {
@@ -121,12 +121,12 @@ export class PrefixTool {
     if (this.deriveIO(data) === PatternState.Found) {
       return PatternState.Found;
     }
-    let prefix = String(data[0].output.value);
+    let prefix = flatten(data[0].output.value);
     let minLen = prefix.length;
     while (prefix.length > 0) {
       let fail = false;
       for (let i=0; i<data.length; i++) {
-        const str = String(data[i].output.value);
+        const str = flatten(data[i].output.value);
         if (str.length < minLen) {
           minLen = str.length;
         }
@@ -156,15 +156,15 @@ export class PrefixTool {
     if (data.length < 1) {
       return PatternState.NotFound;
     }
-    const pre = String(data[0].input.value);
-    const post = String(data[0].output.value);
+    const pre = flatten(data[0].input.value);
+    const post = flatten(data[0].output.value);
     if (pre.length >= post.length) {
       return PatternState.NotFound;
     }
     const prefix = post.substr(0, post.length - pre.length);
     for (let i=0; i<data.length; i++) {
-      const ipre = String(data[i].input.value).toLowerCase();
-      const ipost = String(data[i].output.value).toLowerCase();
+      const ipre = flatten(data[i].input.value).toLowerCase();
+      const ipost = flatten(data[i].output.value).toLowerCase();
       if (ipost !== prefix + ipre) {
         return PatternState.NotFound;
       }
@@ -186,12 +186,12 @@ export class RemovalTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { value: this.strip(String(output.value)) };
+    return { value: this.strip(flatten(output.value)) };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      input: {value: this.strip(String(example.input.value))},
+      input: {value: this.strip(flatten(example.input.value))},
       output: example.output
     };
   }
@@ -203,8 +203,8 @@ export class RemovalTool {
     const left = new Set<string>();
     const right = new Set<string>();
     for (let i=0; i<data.length; i++) {
-      const pre = String(data[i].input.value).toLowerCase();
-      const post = String(data[i].output.value).toLowerCase();
+      const pre = flatten(data[i].input.value).toLowerCase();
+      const post = flatten(data[i].output.value).toLowerCase();
       if (pre.length === post.length) { continue; }
       if (post.length === 0) { continue; }
       for (const ch of pre) { left.add(ch); }
@@ -227,12 +227,12 @@ export class TrimTool {
   }
 
   public forward(output: IOutput): IOutput {
-    return { value: this.strip(String(output.value)) };
+    return { value: this.strip(flatten(output.value)) };
   }
 
   public reverse(example: IExample): IExample {
     return {
-      input: {value: this.strip(String(example.input.value))},
+      input: {value: this.strip(flatten(example.input.value))},
       output: example.output
     };
   }
@@ -243,8 +243,8 @@ export class TrimTool {
     }
     let ct = 0;
     for (let i=0; i<data.length; i++) {
-      const pre = String(data[i].input.value);
-      const post = String(data[i].output.value);
+      const pre = flatten(data[i].input.value);
+      const post = flatten(data[i].output.value);
       if (pre.length === 0) { continue; }
       if (pre.charAt(0) === ' ' && ((post.charAt(0) || ' ') !== ' ')) {
         ct++;

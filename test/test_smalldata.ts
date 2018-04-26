@@ -2,7 +2,7 @@ import {assert, use} from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 
 import {addTheory, getMuse, IExample, IInput, IOutput, mainCore,
-        SimpleTheory, Transform} from '../lib/smalldata';
+  SimpleTheory, Transform, getProfiler} from '../lib/smalldata';
 
 use(chaiAsPromised);
 
@@ -313,6 +313,27 @@ describe("types", () => {
     const result = tr.apply(["  jeff thing! ", "garden hose"]);
     assert.deepEqual(["jeffthing", "gardenhose"], result);
   });
+});
+
+
+describe("lists", () => {
+  it("can select from a dict", () => {
+    const tr = new Transform([
+      [{a: "hi", b: "there"}, "hi"],
+      [{a: "high", b: "five"}, "high"],
+    ]);
+    assert.deepEqual(tr.apply([{a: "say", b: "cheese"}]),
+                     ["say"]);
+  })
+
+  it("can select from a dict and transform a bit", () => {
+    const tr = new Transform([
+      [{a: "hi", b: "there"}, "there!"],
+      [{a: "high", b: "five"}, "five!"],
+    ]);
+    assert.deepEqual(tr.apply([{a: "say", b: "cheese"}]),
+                     ["cheese!"]);
+  })
 });
 
 
