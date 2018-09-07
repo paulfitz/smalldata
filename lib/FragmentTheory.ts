@@ -6,17 +6,19 @@ export class FragmentTheory implements ITheory {
   public constructor(private _window: number) {
   }
 
-  public predict(inputs: IInput[]): IOutput[] {
-    return inputs.map(input => {
+  public async predict(inputs: IInput[]): Promise<IOutput[]> {
+    const results: IOutput[] = [];
+    for (const input of inputs) {
       if (!this._subTheory) {
-        return { value: '', abstain: true };
+        results.push({ value: '', abstain: true });
+        continue;
       }
       const pre = flatten(input.value);
       const w = pre.length - this._window + 1;
       let result = "";
       let fail = false;
       for (let i=0; i<w; i++) {
-        const [pred] = this._subTheory.predict([{value: pre.substr(i, this._window)}]);
+        const [pred] = await this._subTheory.predict([{value: pre.substr(i, this._window)}]);
         if (pred.abstain || pred.value.length !== this._window) {
           fail = true;
           break;
@@ -28,21 +30,25 @@ export class FragmentTheory implements ITheory {
         }
       }
       if (fail) {
-        return { value: '', abstain: true };
+        results.push({ value: '', abstain: true });
+      } else {
+        results.push({ value: result, context: input.context });
       }
-      return { value: result };
-    });
+    }
+    return results;
   }
 
-  public train(examples: IExample[]): void {
+  public async train(examples: IExample[]): Promise<void> {
     const nestedExamples: IExample[] = [];
     for (const example of examples) {
       const pre = flatten(example.input.value);
       const post = flatten(example.output.value);
+      if (pre.length !== post.length) return;
       const w = Math.min(pre.length, post.length) - this._window;
       for (let i=0; i<w; i++) {
         const eg = {
-          input: {value: pre.substr(i, this._window)},
+          input: {value: pre.substr(i, this._window),
+                  context: Object.assign(example.input.context || {}, {fragmented: true})},
           output: {value: post.substr(i, this._window)}
         }
         nestedExamples.push(eg);
@@ -52,11 +58,11 @@ export class FragmentTheory implements ITheory {
       if (!this._subTheory) {
         this._subTheory = getNestedMuse();
       }
-      this._subTheory.train(nestedExamples);
+      await this._subTheory.train(nestedExamples);
     }
   }
 
-  public leak(examples: IExample[], validation: IExample[]): boolean {
+  public async leak(examples: IExample[], validation: IExample[]): Promise<boolean> {
     return false;
   }
 

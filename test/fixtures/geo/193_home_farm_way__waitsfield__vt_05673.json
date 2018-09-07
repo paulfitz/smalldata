@@ -1,0 +1,13 @@
+[
+  {
+    "latitude": 44.201996,
+    "longitude": -72.876056,
+    "country": "United States",
+    "city": "Waitsfield",
+    "state": "VT",
+    "streetName": "Farm Rd",
+    "streetNumber": "193",
+    "countryCode": "US",
+    "provider": "datasciencetoolkit"
+  }
+]

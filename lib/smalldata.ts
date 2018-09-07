@@ -3,6 +3,7 @@ import {getNestedMuse, IExample, ITheory, setMuseMaker} from './ITheory';
 
 export * from './ITheory';
 export {SimpleTheory} from './SimpleTheory';
+export {ITransform, TransformTheory} from './DictTheory';
 
 export function getMuse(): ITheory {
   setMuseMaker(() => new BasicMuse());
@@ -11,21 +12,23 @@ export function getMuse(): ITheory {
 
 export class Transform {
   private _muse = getMuse();
+  private _train: Promise<void>;
 
   constructor(public examples: [any, any][]) {
-    this._muse.train(examples.map(eg => ({
+    this._train = this._muse.train(examples.map(eg => ({
       input: {value: eg[0]},
       output: {value: eg[1]}
     })));
   }
 
-  public apply(inputs: any[]): any[] {
-    return this._muse.predict(inputs.map(input => ({value: input}))).map(x => x.value);
+  public async apply(inputs: any[]): Promise<any[]> {
+    await this._train;
+    const results = await this._muse.predict(inputs.map(input => ({value: input})));
+    return results.map(x => x.value);
   }
 }
 
-export function mainCore(examples: string[]) {
-  const results = new Array<[string, string]>();
+export async function mainCore(examples: string[]): Promise<Array<[string, any]>> {
   const trainingData = new Array<IExample>();
   const testData = new Array<string>();
   for (const example of examples) {
@@ -37,11 +40,9 @@ export function mainCore(examples: string[]) {
     }
   }
   const bm = getMuse();
-  bm.train(trainingData);
-  for (const test of testData) {
-      results.push([test, bm.predict([{value: test}])[0].value]);
-  }
-  return results;
+  await bm.train(trainingData);
+  const results = await bm.predict(testData.map(value => ({value})));
+  return testData.map((value, index) => [value, results[index].value] as [string, any]);
 }
 
 export function main() {
@@ -51,8 +52,9 @@ export function main() {
     console.log("  smalldata hi:HI there:THERE you:");
     console.log("  # result is YOU");
   }
-  const results = mainCore(examples);
-  for (const [key, val] of results) {
-    console.log(`${key}:${val}`);
-  }
+  mainCore(examples).then(results => {
+    for (const [key, val] of results) {
+      console.log(`${key}:${val}`);
+    }
+  });
 }

@@ -7,7 +7,7 @@ export class PastTheory implements ITheory {
     this._past.clear();
   }
 
-  public predict(inputs: IInput[]): IOutput[] {
+  public async predict(inputs: IInput[]): Promise<IOutput[]> {
     return inputs.map(input => {
       const curr = String(input.value);
       const guess = this._past.get(curr);
@@ -16,14 +16,14 @@ export class PastTheory implements ITheory {
     });
   }
 
-  public train(examples: IExample[]): void {
+  public async train(examples: IExample[]): Promise<void> {
     for (const example of examples) {
       this._past.set(example.input.value,
                      example.output.value);
     }
   }  
 
-  public leak(examples: IExample[], validation: IExample[]): boolean {
+  public async leak(examples: IExample[], validation: IExample[]): Promise<boolean> {
     return false;
   }
 

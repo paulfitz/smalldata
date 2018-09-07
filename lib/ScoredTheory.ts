@@ -13,8 +13,8 @@ export class ScoredTheory {
   public getStats() {
     return [this.getScore(), this._hits, this._misses];
   }
-  public score(example: IExample) {
-    const [pred] = this.theory.predict([example.input]);
+  public async score(example: IExample) {
+    const [pred] = await this.theory.predict([example.input]);
     if (pred.abstain) {
       return 0;
     } else {
@@ -35,33 +35,20 @@ export class ScoringMuse implements ITheory {
     this._theories.push(new ScoredTheory(theory));
   }
 
-  public incrementalScore(option: ScoredTheory, examples: IExample[]) {
-    for (let i=0; i<examples.length; i++) {
-      const trainingData = examples.slice(0, i);
-      option.theory.reset();
-      if (i > 0) {
-        option.theory.train(trainingData);
-      }
-      option.score(examples[i]);
-    }
-    option.theory.reset();
-    option.theory.train(examples);
-  }
-
-  public leaveOneOutScore(option: ScoredTheory, examples: IExample[]) {
+  public async leaveOneOutScore(option: ScoredTheory, examples: IExample[]) {
     for (let i=0; i<examples.length; i++) {
       const trainingData = examples.slice(0, i).concat(examples.slice(i + 1)); 
       option.theory.reset();
-      if (!option.theory.leak(trainingData, [examples[i]])) {
-        option.theory.train(trainingData);
+      if (!await option.theory.leak(trainingData, [examples[i]])) {
+        await option.theory.train(trainingData);
       }
-      option.score(examples[i]);
+      await option.score(examples[i]);
     }
     option.theory.reset();
-    option.theory.train(examples);
+    await option.theory.train(examples);
   }
 
-  public splitScore(option: ScoredTheory, examples: IExample[], nsplits: number) {
+  public async splitScore(option: ScoredTheory, examples: IExample[], nsplits: number) {
     const n = examples.length;
     const egs = shuffle(examples).map((val, idx) => [val, Math.floor(nsplits * idx / n)] as
                                       [IExample, number]);
@@ -69,34 +56,36 @@ export class ScoringMuse implements ITheory {
       const trainingData = egs.filter(([val, key]) => key !== s).map(([val, key]) => val);
       const validationData = egs.filter(([val, key]) => key === s).map(([val, key]) => val);
       option.theory.reset();
-      if (!option.theory.leak(trainingData, validationData)) {
-        option.theory.train(trainingData);
+      if (!await option.theory.leak(trainingData, validationData)) {
+        await option.theory.train(trainingData);
       }
       for (const eg of validationData) {
-        option.score(eg);
+        await option.score(eg);
       }
     }
     option.theory.reset();
-    option.theory.train(examples);
+    await option.theory.train(examples);
   }
 
-  public train(examples: IExample[]) {
+  public async train(examples: IExample[]) {
     for (const option of this._theories) {
       getProfiler().countTrains(option.theory);
       if (option.theory.trainable()) {
         if (examples.length < 15) {
-          this.leaveOneOutScore(option, examples);
+          await this.leaveOneOutScore(option, examples);
         } else {
-          this.splitScore(option, examples, 5);
+          await this.splitScore(option, examples, 5);
         }
       } else {
-        examples.forEach(eg => option.score(eg));
+        for (const eg of examples) {
+          await option.score(eg);
+        }
       }
     }
   }
 
-  public leak(examples: IExample[], validation: IExample[]): boolean {
-    this.train(examples.concat(validation));
+  public async leak(examples: IExample[], validation: IExample[]): Promise<boolean> {
+    await this.train(examples.concat(validation));
     return true;
   }
 
@@ -130,12 +119,13 @@ export class ScoringMuse implements ITheory {
     }
   }
 
-  public predict(inputs: IInput[]): IOutput[] {
-    return inputs.map(input => {
+  public async predict(inputs: IInput[]): Promise<IOutput[]> {
+    const results: IOutput[] = [];
+    for (const input of inputs) {
       let bestPred: IOutput|null = null;
       let bestScore = -1.0;
       for (const option of this._theories) {
-        const [pred] = option.theory.predict([input]);
+        const [pred] = await option.theory.predict([input]);
         if (pred.abstain) { continue; }
         const score = option.getScore();
         if (score > bestScore) {
@@ -143,8 +133,9 @@ export class ScoringMuse implements ITheory {
           bestPred = pred;
         }
       }
-      return bestPred || { value: "?", abstain: true };
-    });
+      results.push(bestPred || { value: "?", abstain: true });
+    }
+    return results;
   }
 
   public trainable(): boolean {
